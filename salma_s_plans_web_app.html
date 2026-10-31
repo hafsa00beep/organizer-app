@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سلميز بلانس - Salma's Plans</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Spotify Mix Font Imports & Configuration */
+        @font-face {
+            font-family: 'Spotify Mix';
+            src: url('https://cdn.jsdelivr.net/gh/philippos/spotify-mix-font/SpotifyMix-Regular.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Spotify Mix';
+            src: url('https://cdn.jsdelivr.net/gh/philippos/spotify-mix-font/SpotifyMix-Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        /* Strict font enforcement on every element */
+        * {
+            font-family: 'Spotify Mix', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        }
+
+        /* Palette Colors */
+        :root {
+            --ashes: #B7B4AE;
+            --light-charcoal: #726E68;
+            --dryad-bark: #33312F;
+            --black-kite: #371E1E;
+            --existential-angst: #0A0A0A;
+        }
+
+        body {
+            background-color: var(--existential-angst);
+            color: var(--ashes);
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--existential-angst);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--dryad-bark);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--light-charcoal);
+        }
+
+        /* Smooth Canvas */
+        #drawingCanvas {
+            cursor: crosshair;
+            touch-action: none;
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ashes: '#B7B4AE',
+                        lightCharcoal: '#726E68',
+                        dryadBark: '#33312F',
+                        blackKite: '#371E1E',
+                        existentialAngst: '#0A0A0A',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-blackKite selection:text-ashes">
+
+    <!-- Header Section -->
+    <header class="w-full bg-dryadBark/70 backdrop-blur-md border-b border-lightCharcoal/30 sticky top-0 z-40">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-blackKite flex items-center justify-center border border-lightCharcoal/40 shadow-lg">
+                    <i data-lucide="sparkles" class="w-6 h-6 text-ashes"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-ashes tracking-wide">سلميز بلانس</h1>
+                    <p class="text-xs text-ashes/50">Salma's Plans & Study Workspace</p>
+                </div>
+            </div>
+            <span class="text-xs px-3 py-1.5 rounded-full bg-blackKite/80 border border-lightCharcoal/40 text-ashes/80">
+                مساحة تنظيمية
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 py-8 w-full flex-grow space-y-8">
+
+        <!-- Grid Top: Tasks & Custom Timer -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+            <!-- Subjects & Tasks Section -->
+            <section class="md:col-span-7 bg-dryadBark/40 border border-lightCharcoal/30 rounded-2xl p-6 shadow-2xl flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="check-square" class="w-5 h-5 text-ashes"></i>
+                            <h2 class="text-lg font-bold text-ashes">المواد والمهام</h2>
+                        </div>
+                        <span id="taskCounter" class="text-xs px-2.5 py-1 rounded-md bg-blackKite/60 text-ashes/70">0/0 مكتمل</span>
+                    </div>
+
+                    <!-- Input Form -->
+                    <form id="taskForm" onsubmit="event.preventDefault(); addTask();" class="flex gap-2 mb-4">
+                        <input type="text" id="taskInput" placeholder="أضيفي مادة أو مهمة جديدة..." class="w-full bg-existentialAngst border border-lightCharcoal/40 rounded-xl px-4 py-3 text-sm text-ashes placeholder-ashes/30 focus:outline-none focus:border-ashes">
+                        <button type="submit" class="px-5 py-3 bg-blackKite hover:bg-blackKite/80 border border-lightCharcoal/50 rounded-xl text-ashes font-bold transition flex items-center justify-center gap-1 shadow-md">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                        </button>
+                    </form>
+
+                    <!-- Tasks List -->
+                    <div id="taskList" class="space-y-2.5 max-h-[260px] overflow-y-auto pr-1">
+                        <!-- Items populated via JS -->
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-lightCharcoal/20 flex justify-between items-center text-xs text-ashes/50">
+                    <span>(✓) للإنجاز | (✗) للتعثر أو الإلغاء</span>
+                    <button onclick="clearAllTasks()" class="hover:text-ashes transition underline">مسح القائمة</button>
+                </div>
+            </section>
+
+            <!-- Custom Timer Section -->
+            <section class="md:col-span-5 bg-dryadBark/40 border border-lightCharcoal/30 rounded-2xl p-6 shadow-2xl flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="timer" class="w-5 h-5 text-ashes"></i>
+                            <h2 class="text-lg font-bold text-ashes">المؤقت التنازلي</h2>
+                        </div>
+                        <span id="timerStatus" class="text-xs px-2.5 py-1 rounded-md bg-blackKite/60 text-ashes/70">جاهز</span>
+                    </div>
+
+                    <!-- Countdown Screen -->
+                    <div class="text-center py-5 bg-existentialAngst/80 rounded-xl border border-lightCharcoal/20 my-3 shadow-inner">
+                        <span id="timerDisplay" class="text-5xl font-bold font-mono text-ashes tracking-widest">25:00</span>
+                    </div>
+
+                    <!-- Custom Minutes Setter -->
+                    <div class="flex gap-2 mb-4">
+                        <input type="number" id="customMinutes" min="1" max="300" placeholder="الدقائق..." class="w-full bg-existentialAngst border border-lightCharcoal/40 rounded-xl px-3 py-2 text-sm text-ashes text-center focus:outline-none focus:border-ashes">
+                        <button onclick="setCustomTimer()" class="px-4 py-2 bg-lightCharcoal/30 hover:bg-lightCharcoal/50 border border-lightCharcoal/40 rounded-xl text-xs text-ashes transition whitespace-nowrap">تعيين الوقت</button>
+                    </div>
+
+                    <!-- Quick Shortcuts -->
+                    <div class="grid grid-cols-3 gap-2 mb-4">
+                        <button onclick="setTimerMinutes(15)" class="py-1.5 bg-dryadBark hover:bg-lightCharcoal/40 border border-lightCharcoal/30 rounded-lg text-xs text-ashes transition">15 دقيقة</button>
+                        <button onclick="setTimerMinutes(25)" class="py-1.5 bg-dryadBark hover:bg-lightCharcoal/40 border border-lightCharcoal/30 rounded-lg text-xs text-ashes transition">25 دقيقة</button>
+                        <button onclick="setTimerMinutes(45)" class="py-1.5 bg-dryadBark hover:bg-lightCharcoal/40 border border-lightCharcoal/30 rounded-lg text-xs text-ashes transition">45 دقيقة</button>
+                    </div>
+                </div>
+
+                <!-- Timer Controls -->
+                <div class="flex gap-2">
+                    <button id="startPauseBtn" onclick="toggleTimer()" class="flex-1 py-3 bg-blackKite hover:bg-blackKite/80 border border-lightCharcoal/50 rounded-xl text-sm font-bold text-ashes flex items-center justify-center gap-2 transition shadow-lg">
+                        <i data-lucide="play" class="w-4 h-4" id="timerIcon"></i>
+                        <span id="timerBtnText">بدء</span>
+                    </button>
+                    <button onclick="resetTimer()" class="px-4 py-3 bg-dryadBark hover:bg-lightCharcoal/30 border border-lightCharcoal/30 rounded-xl text-ashes transition">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Notes & Canvas Section -->
+        <section class="bg-dryadBark/40 border border-lightCharcoal/30 rounded-2xl p-6 shadow-2xl">
+            <!-- Tabs Bar -->
+            <div class="flex items-center justify-between mb-5 border-b border-lightCharcoal/20 pb-4">
+                <div class="flex gap-3">
+                    <button id="textTabBtn" onclick="switchTab('text')" class="px-4 py-2 rounded-xl text-sm font-bold bg-blackKite text-ashes border border-lightCharcoal/40 transition flex items-center gap-2">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                        نوتة كتابة
+                    </button>
+                    <button id="drawTabBtn" onclick="switchTab('draw')" class="px-4 py-2 rounded-xl text-sm font-bold bg-dryadBark text-ashes/60 border border-lightCharcoal/20 hover:text-ashes transition flex items-center gap-2">
+                        <i data-lucide="pen-tool" class="w-4 h-4"></i>
+                        مساحة رسم
+                    </button>
+                </div>
+
+                <!-- Drawing Controls -->
+                <div id="canvasControls" class="hidden flex items-center gap-3">
+                    <input type="color" id="brushColor" value="#B7B4AE" class="w-8 h-8 rounded-lg bg-transparent border-0 cursor-pointer">
+                    <input type="range" id="brushSize" min="2" max="25" value="4" class="w-20 accent-ashes">
+                    <button onclick="clearCanvas()" class="px-3 py-1.5 bg-blackKite hover:bg-blackKite/80 border border-lightCharcoal/40 rounded-lg text-xs text-ashes transition flex items-center gap-1">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        مسح
+                    </button>
+                </div>
+            </div>
+
+            <!-- Text Notes Area -->
+            <div id="textPanel" class="space-y-3">
+                <textarea id="notesArea" placeholder="اكتبي ملخصاتكِ، ملاحظاتكِ، أو أفكاركِ هنا..." class="w-full h-60 bg-existentialAngst border border-lightCharcoal/30 rounded-xl p-4 text-ashes placeholder-ashes/30 resize-none focus:outline-none focus:border-ashes text-sm leading-relaxed"></textarea>
+                <div class="flex justify-between items-center text-xs text-ashes/50">
+                    <span id="saveNotice">يتم حفظ الملاحظات تلقائياً</span>
+                    <button onclick="saveNotes()" class="px-4 py-2 bg-blackKite hover:bg-blackKite/80 border border-lightCharcoal/40 rounded-lg text-ashes transition flex items-center gap-1.5">
+                        <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                        حفظ الملاحظة
+                    </button>
+                </div>
+            </div>
+
+            <!-- Drawing Canvas Area -->
+            <div id="drawPanel" class="hidden">
+                <div class="w-full bg-existentialAngst border border-lightCharcoal/30 rounded-xl overflow-hidden shadow-inner">
+                    <canvas id="drawingCanvas" class="w-full h-72"></canvas>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Alarm Popup -->
+    <div id="alarmModal" class="fixed inset-0 bg-existentialAngst/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-dryadBark border border-lightCharcoal/40 rounded-2xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl">
+            <div class="w-14 h-14 bg-blackKite rounded-full flex items-center justify-center mx-auto border border-lightCharcoal/40">
+                <i data-lucide="bell" class="w-7 h-7 text-ashes animate-bounce"></i>
+            </div>
+            <h3 class="text-xl font-bold text-ashes">انتهى الوقت! 🔔</h3>
+            <p class="text-sm text-ashes/70">انتهت الفترة الزمنية المحددة بنجاح.</p>
+            <button onclick="closeAlarmModal()" class="w-full py-3 bg-blackKite hover:bg-blackKite/80 border border-lightCharcoal/50 rounded-xl text-ashes font-bold transition">
+                حسناً، إغلاق التنبيه
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full py-6 border-t border-lightCharcoal/20 bg-existentialAngst text-center">
+        <p class="text-xs text-ashes/40 font-mono tracking-widest">
+            by Hafa
+        </p>
+    </footer>
+
+    <!-- Main JavaScript Code -->
+    <script>
+        // Init Icons
+        lucide.createIcons();
+
+        /* ==================== Task Manager ==================== */
+        let tasks = JSON.parse(localStorage.getItem('salma_tasks_v2')) || [
+            { id: 1, text: 'مراجعة المادة الأولى', status: 'done' },
+            { id: 2, text: 'إنهاء حل التمارين', status: 'pending' }
+        ];
+
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+            let doneCount = 0;
+
+            tasks.forEach(task => {
+                if (task.status === 'done') doneCount++;
+
+                const div = document.createElement('div');
+                div.className = `flex items-center justify-between p-3 rounded-xl border transition ${
+                    task.status === 'done' 
+                        ? 'bg-existentialAngst/40 border-lightCharcoal/20 text-ashes/40' 
+                        : task.status === 'fail'
+                        ? 'bg-blackKite/20 border-blackKite/40 text-ashes/60'
+                        : 'bg-existentialAngst border-lightCharcoal/30 text-ashes'
+                }`;
+
+                div.innerHTML = `
+                    <span class="text-sm font-medium ${task.status === 'done' ? 'line-through' : ''}">${escapeHtml(task.text)}</span>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="setTaskStatus(${task.id}, 'done')" title="مكتمل" class="p-1.5 rounded-lg border ${task.status === 'done' ? 'bg-blackKite border-lightCharcoal text-emerald-400' : 'bg-dryadBark border-lightCharcoal/20 text-ashes/40 hover:text-ashes'} transition">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="setTaskStatus(${task.id}, 'fail')" title="غير مكتمل" class="p-1.5 rounded-lg border ${task.status === 'fail' ? 'bg-blackKite border-lightCharcoal text-rose-400' : 'bg-dryadBark border-lightCharcoal/20 text-ashes/40 hover:text-ashes'} transition">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="deleteTask(${task.id})" title="حذف" class="p-1.5 text-ashes/30 hover:text-rose-300 transition mr-1">
+                            <i data-lucide="trash" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+                taskList.appendChild(div);
+            });
+
+            document.getElementById('taskCounter').innerText = `${doneCount}/${tasks.length} مكتمل`;
+            localStorage.setItem('salma_tasks_v2', JSON.stringify(tasks));
+            lucide.createIcons();
+        }
+
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            const val = input.value.trim();
+            if (!val) return;
+
+            tasks.push({
+                id: Date.now(),
+                text: val,
+                status: 'pending'
+            });
+
+            input.value = '';
+            renderTasks();
+        }
+
+        function setTaskStatus(id, status) {
+            tasks = tasks.map(t => t.id === id ? { ...t, status: t.status === status ? 'pending' : status } : t);
+            renderTasks();
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            renderTasks();
+        }
+
+        function clearAllTasks() {
+            if (tasks.length === 0) return;
+            tasks = [];
+            renderTasks();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
+
+
+        /* ==================== Custom Countdown Timer ==================== */
+        let timerSeconds = 25 * 60;
+        let initialSeconds = 25 * 60;
+        let timerInterval = null;
+        let isRunning = false;
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timerSeconds / 60);
+            const secs = timerSeconds % 60;
+            document.getElementById('timerDisplay').innerText = 
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function setTimerMinutes(mins) {
+            pauseTimer();
+            timerSeconds = mins * 60;
+            initialSeconds = mins * 60;
+            updateTimerDisplay();
+            document.getElementById('timerStatus').innerText = 'جاهز';
+        }
+
+        function setCustomTimer() {
+            const val = parseInt(document.getElementById('customMinutes').value);
+            if (val && val > 0) {
+                setTimerMinutes(val);
+                document.getElementById('customMinutes').value = '';
+            }
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            if (timerSeconds <= 0) return;
+            isRunning = true;
+            document.getElementById('timerBtnText').innerText = 'إيقاف مؤقت';
+            document.getElementById('timerStatus').innerText = 'يعمل الآن...';
+            
+            const icon = document.getElementById('timerIcon');
+            icon.setAttribute('data-lucide', 'pause');
+            lucide.createIcons();
+
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                updateTimerDisplay();
+
+                if (timerSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    isRunning = false;
+                    document.getElementById('timerBtnText').innerText = 'بدء';
+                    document.getElementById('timerStatus').innerText = 'انتهى!';
+                    playAlarmSound();
+                    showAlarmModal();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            document.getElementById('timerBtnText').innerText = 'استئناف';
+            document.getElementById('timerStatus').innerText = 'متوقف مؤقتاً';
+            const icon = document.getElementById('timerIcon');
+            icon.setAttribute('data-lucide', 'play');
+            lucide.createIcons();
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timerSeconds = initialSeconds;
+            updateTimerDisplay();
+            document.getElementById('timerStatus').innerText = 'جاهز';
+            document.getElementById('timerBtnText').innerText = 'بدء';
+        }
+
+        function playAlarmSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.25);
+
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+                osc.stop(ctx.currentTime + 0.9);
+            } catch(e) {}
+        }
+
+        function showAlarmModal() {
+            document.getElementById('alarmModal').classList.remove('hidden');
+        }
+
+        function closeAlarmModal() {
+            document.getElementById('alarmModal').classList.add('hidden');
+            resetTimer();
+        }
+
+
+        /* ==================== Text Notes & Canvas Drawing ==================== */
+        const textPanel = document.getElementById('textPanel');
+        const drawPanel = document.getElementById('drawPanel');
+        const textTabBtn = document.getElementById('textTabBtn');
+        const drawTabBtn = document.getElementById('drawTabBtn');
+        const canvasControls = document.getElementById('canvasControls');
+
+        const notesArea = document.getElementById('notesArea');
+        notesArea.value = localStorage.getItem('salma_notes_v2') || '';
+
+        notesArea.addEventListener('input', () => {
+            localStorage.setItem('salma_notes_v2', notesArea.value);
+        });
+
+        function saveNotes() {
+            localStorage.setItem('salma_notes_v2', notesArea.value);
+            const notice = document.getElementById('saveNotice');
+            notice.innerText = 'تم التخزين بنجاح!';
+            setTimeout(() => {
+                notice.innerText = 'يتم حفظ الملاحظات تلقائياً';
+            }, 2000);
+        }
+
+        function switchTab(tab) {
+            if (tab === 'text') {
+                textPanel.classList.remove('hidden');
+                drawPanel.classList.add('hidden');
+                canvasControls.classList.add('hidden');
+
+                textTabBtn.className = 'px-4 py-2 rounded-xl text-sm font-bold bg-blackKite text-ashes border border-lightCharcoal/40 transition flex items-center gap-2';
+                drawTabBtn.className = 'px-4 py-2 rounded-xl text-sm font-bold bg-dryadBark text-ashes/60 border border-lightCharcoal/20 hover:text-ashes transition flex items-center gap-2';
+            } else {
+                textPanel.classList.add('hidden');
+                drawPanel.classList.remove('hidden');
+                canvasControls.classList.remove('hidden');
+
+                drawTabBtn.className = 'px-4 py-2 rounded-xl text-sm font-bold bg-blackKite text-ashes border border-lightCharcoal/40 transition flex items-center gap-2';
+                textTabBtn.className = 'px-4 py-2 rounded-xl text-sm font-bold bg-dryadBark text-ashes/60 border border-lightCharcoal/20 hover:text-ashes transition flex items-center gap-2';
+
+                resizeCanvas();
+            }
+        }
+
+        // Canvas Setup
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            if (canvas.width !== rect.width || canvas.height !== rect.height) {
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.drawImage(canvas, 0, 0);
+
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.drawImage(tempCanvas, 0, 0);
+            }
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function getCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            let x, y;
+            if (e.touches && e.touches[0]) {
+                x = e.touches[0].clientX - rect.left;
+                y = e.touches[0].clientY - rect.top;
+            } else {
+                x = e.clientX - rect.left;
+                y = e.clientY - rect.top;
+            }
+            return { x, y };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const { x, y } = getCoords(e);
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+            const { x, y } = getCoords(e);
+            ctx.strokeStyle = document.getElementById('brushColor').value;
+            ctx.lineWidth = document.getElementById('brushSize').value;
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.closePath();
+        }
+
+        // Listeners for mouse and touch
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseleave', stopDrawing);
+
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        /* ==================== Init ==================== */
+        window.onload = function() {
+            renderTasks();
+            updateTimerDisplay();
+            window.addEventListener('resize', () => {
+                if (!drawPanel.classList.contains('hidden')) {
+                    resizeCanvas();
+                }
+            });
+        };
+    </script>
+</body>
+</html>
