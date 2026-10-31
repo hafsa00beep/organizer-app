@@ -4,15 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سلميز بلانس</title>
-    <!-- استدعاء خط Spotify Mix من شبكة CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/philippos/spotify-mix-font/spotify-mix.css">
+    <!-- استدعاء خط Spotify Mix -->
+    <link href="https://fonts.cdnfonts.com/css/spotify-mix" rel="stylesheet">
     <style>
-        @font-face {
-            font-family: 'Spotify Mix';
-            src: url('https://cdn.jsdelivr.net/gh/philippos/spotify-mix-font/SpotifyMix-Regular.woff2') format('woff2');
-            font-weight: normal;
-            font-style: normal;
-        }
+        @import url('https://fonts.cdnfonts.com/css/spotify-mix');
 
         :root {
             --ashes: #B7B4AE;
@@ -26,7 +21,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Spotify Mix', 'Segoe UI', Tahoma, sans-serif !important;
+            font-family: 'Spotify Mix', sans-serif !important;
         }
 
         body {
@@ -77,17 +72,31 @@
             gap: 8px;
         }
 
-        /* المؤقت */
+        /* المؤقت المخصص */
         .timer-display {
             font-size: 3rem;
             text-align: center;
             font-weight: bold;
             color: var(--ashes);
-            margin: 15px 0;
+            margin: 10px 0;
             letter-spacing: 2px;
         }
 
-        .timer-controls, .timer-presets {
+        .timer-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .timer-input-group input {
+            width: 80px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .timer-controls {
             display: flex;
             justify-content: center;
             gap: 10px;
@@ -120,7 +129,7 @@
             background-color: #d1ceb8;
         }
 
-        /* إضافة المواد والمهام */
+        /* المواد والمهام */
         .add-task-form {
             display: flex;
             gap: 10px;
@@ -133,8 +142,11 @@
             color: var(--ashes);
             padding: 10px;
             border-radius: 6px;
-            flex: 1;
             outline: none;
+        }
+
+        input[type="text"] {
+            flex: 1;
         }
 
         input[type="text"]:focus, input[type="number"]:focus {
@@ -246,7 +258,7 @@
             <h1>سلميز بلانس</h1>
         </header>
 
-        <!-- قسم المهام والمواد -->
+        <!-- قسم المواد والمهام -->
         <div class="card">
             <div class="card-title">📌 المواد والمهام</div>
             <form class="add-task-form" id="taskForm">
@@ -256,15 +268,15 @@
             <ul class="tasks-list" id="taskList"></ul>
         </div>
 
-        <!-- قسم المؤقت -->
+        <!-- قسم المؤقت (تضبطه العميلة كما تحب) -->
         <div class="card">
-            <div class="card-title">⏱️ المؤقت الإنجازي</div>
-            <div class="timer-display" id="timerDisplay">25:00</div>
-            <div class="timer-presets" style="margin-bottom: 12px;">
-                <button class="btn" onclick="setTimer(15)">15 دقيقة</button>
-                <button class="btn" onclick="setTimer(25)">25 دقيقة</button>
-                <button class="btn" onclick="setTimer(45)">45 دقيقة</button>
+            <div class="card-title">⏱️ المؤقت الشخصي</div>
+            <div class="timer-input-group">
+                <label style="font-size: 0.9rem;">حددي الوقت (دقائق):</label>
+                <input type="number" id="customMinutes" min="1" max="180" value="25">
+                <button class="btn btn-main" onclick="applyCustomTime()">تعيين</button>
             </div>
+            <div class="timer-display" id="timerDisplay">25:00</div>
             <div class="timer-controls">
                 <button class="btn btn-main" id="startBtn" onclick="toggleTimer()">بدء</button>
                 <button class="btn" onclick="resetTimer()">إعادة ضبط</button>
@@ -275,8 +287,8 @@
         <div class="card">
             <div class="card-title">📝 نوتة الكتابة والرسم</div>
             <div class="notes-tab">
-                <button class="btn" id="btnTextTab" onclick="switchTab('text')">كتابة</button>
-                <button class="btn" id="btnDrawTab" onclick="switchTab('draw')">رسم</button>
+                <button class="btn" onclick="switchTab('text')">كتابة</button>
+                <button class="btn" onclick="switchTab('draw')">رسم</button>
             </div>
 
             <!-- منطقة النص -->
@@ -350,7 +362,7 @@
             renderTasks();
         }
 
-        // --- المؤقت والتنبيه ---
+        // --- المؤقت الحر ---
         let timeLeft = 25 * 60;
         let timerInterval = null;
 
@@ -361,11 +373,12 @@
                 `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        function setTimer(minutes) {
+        function applyCustomTime() {
             clearInterval(timerInterval);
             timerInterval = null;
             document.getElementById('startBtn').textContent = 'بدء';
-            timeLeft = minutes * 60;
+            const mins = parseInt(document.getElementById('customMinutes').value) || 25;
+            timeLeft = mins * 60;
             updateTimerDisplay();
         }
 
@@ -385,7 +398,7 @@
                         clearInterval(timerInterval);
                         timerInterval = null;
                         startBtn.textContent = 'بدء';
-                        alert('🔔 انتهى الوقت! وقت أخذ استراحة.');
+                        alert('🔔 انتهى الوقت!');
                     }
                 }, 1000);
             }
@@ -395,8 +408,7 @@
             clearInterval(timerInterval);
             timerInterval = null;
             document.getElementById('startBtn').textContent = 'بدء';
-            timeLeft = 25 * 60;
-            updateTimerDisplay();
+            applyCustomTime();
         }
 
         // --- النوتة ورسم الـ Canvas ---
@@ -417,7 +429,6 @@
             localStorage.setItem('salma_note', document.getElementById('noteText').value);
         }
 
-        // إعدادات اللوحة للرسم
         const canvas = document.getElementById('paintCanvas');
         const ctx = canvas.getContext('2d');
         let painting = false;
@@ -464,7 +475,6 @@
         canvas.addEventListener('touchend', finishedPosition);
         canvas.addEventListener('touchmove', draw);
 
-        // تحميل البيانات المحفوظة عند الفتح
         window.onload = () => {
             renderTasks();
             updateTimerDisplay();
