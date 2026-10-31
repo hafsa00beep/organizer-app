@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سلميز بلانس</title>
+    <!-- استدعاء خط Spotify Mix من شبكة CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/philippos/spotify-mix-font/spotify-mix.css">
+    <style>
+        @font-face {
+            font-family: 'Spotify Mix';
+            src: url('https://cdn.jsdelivr.net/gh/philippos/spotify-mix-font/SpotifyMix-Regular.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        :root {
+            --ashes: #B7B4AE;
+            --light-charcoal: #726E68;
+            --dryad-bark: #33312F;
+            --black-kite: #371E1E;
+            --existential-angst: #0A0A0A;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Spotify Mix', 'Segoe UI', Tahoma, sans-serif !important;
+        }
+
+        body {
+            background-color: var(--existential-angst);
+            color: var(--ashes);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 15px 0;
+            border-bottom: 2px solid var(--black-kite);
+        }
+
+        header h1 {
+            color: var(--ashes);
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+        }
+
+        .card {
+            background-color: var(--dryad-bark);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border: 1px solid var(--light-charcoal);
+        }
+
+        .card-title {
+            color: var(--ashes);
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* المؤقت */
+        .timer-display {
+            font-size: 3rem;
+            text-align: center;
+            font-weight: bold;
+            color: var(--ashes);
+            margin: 15px 0;
+            letter-spacing: 2px;
+        }
+
+        .timer-controls, .timer-presets {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background-color: var(--black-kite);
+            color: var(--ashes);
+            border: 1px solid var(--light-charcoal);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            background-color: var(--light-charcoal);
+            color: var(--existential-angst);
+        }
+
+        .btn-main {
+            background-color: var(--ashes);
+            color: var(--existential-angst);
+            font-weight: bold;
+        }
+
+        .btn-main:hover {
+            background-color: #d1ceb8;
+        }
+
+        /* إضافة المواد والمهام */
+        .add-task-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"], input[type="number"] {
+            background-color: var(--existential-angst);
+            border: 1px solid var(--light-charcoal);
+            color: var(--ashes);
+            padding: 10px;
+            border-radius: 6px;
+            flex: 1;
+            outline: none;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: var(--ashes);
+        }
+
+        .tasks-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .task-item {
+            background-color: var(--existential-angst);
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-right: 4px solid var(--light-charcoal);
+        }
+
+        .task-item.status-done {
+            border-right-color: #4CAF50;
+        }
+
+        .task-item.status-fail {
+            border-right-color: #f44336;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            border: none;
+            background: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .btn-check { color: #4CAF50; }
+        .btn-cross { color: #f44336; }
+        .btn-delete { color: var(--light-charcoal); }
+
+        /* نوتة الكتابة والرسم */
+        .notes-tab {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 140px;
+            background-color: var(--existential-angst);
+            color: var(--ashes);
+            border: 1px solid var(--light-charcoal);
+            border-radius: 6px;
+            padding: 10px;
+            resize: vertical;
+            outline: none;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+        }
+
+        canvas {
+            background-color: var(--existential-angst);
+            border: 1px solid var(--light-charcoal);
+            border-radius: 6px;
+            cursor: crosshair;
+            touch-action: none;
+            width: 100%;
+            height: 180px;
+        }
+
+        .canvas-tools {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--light-charcoal);
+            letter-spacing: 0.5px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- الهيدر باسم التطبيق -->
+        <header>
+            <h1>سلميز بلانس</h1>
+        </header>
+
+        <!-- قسم المهام والمواد -->
+        <div class="card">
+            <div class="card-title">📌 المواد والمهام</div>
+            <form class="add-task-form" id="taskForm">
+                <input type="text" id="taskInput" placeholder="اكتبي اسم المادة أو المهمة..." required>
+                <button type="submit" class="btn btn-main">➕ إضافة</button>
+            </form>
+            <ul class="tasks-list" id="taskList"></ul>
+        </div>
+
+        <!-- قسم المؤقت -->
+        <div class="card">
+            <div class="card-title">⏱️ المؤقت الإنجازي</div>
+            <div class="timer-display" id="timerDisplay">25:00</div>
+            <div class="timer-presets" style="margin-bottom: 12px;">
+                <button class="btn" onclick="setTimer(15)">15 دقيقة</button>
+                <button class="btn" onclick="setTimer(25)">25 دقيقة</button>
+                <button class="btn" onclick="setTimer(45)">45 دقيقة</button>
+            </div>
+            <div class="timer-controls">
+                <button class="btn btn-main" id="startBtn" onclick="toggleTimer()">بدء</button>
+                <button class="btn" onclick="resetTimer()">إعادة ضبط</button>
+            </div>
+        </div>
+
+        <!-- قسم النوتة والرسم -->
+        <div class="card">
+            <div class="card-title">📝 نوتة الكتابة والرسم</div>
+            <div class="notes-tab">
+                <button class="btn" id="btnTextTab" onclick="switchTab('text')">كتابة</button>
+                <button class="btn" id="btnDrawTab" onclick="switchTab('draw')">رسم</button>
+            </div>
+
+            <!-- منطقة النص -->
+            <div id="textSection">
+                <textarea id="noteText" placeholder="اكتبي ملاحظاتك هنا... (تُحفظ تلقائياً)" oninput="saveNote()"></textarea>
+            </div>
+
+            <!-- منطقة الرسم -->
+            <div id="drawSection" class="hidden">
+                <div class="canvas-container">
+                    <canvas id="paintCanvas"></canvas>
+                </div>
+                <div class="canvas-tools">
+                    <input type="color" id="colorPicker" value="#B7B4AE" style="border:none; background:none; cursor:pointer;">
+                    <button class="btn" onclick="clearCanvas()">مسح اللوحة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الفوتر المطلوب -->
+    <footer>
+        by Hafa
+    </footer>
+
+    <script>
+        // --- إدارة المهام ---
+        let tasks = JSON.parse(localStorage.getItem('salma_tasks')) || [];
+
+        function renderTasks() {
+            const list = document.getElementById('taskList');
+            list.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.className = `task-item ${task.status ? 'status-' + task.status : ''}`;
+                
+                let statusMark = '';
+                if(task.status === 'done') statusMark = ' <span style="color:#4CAF50;">✓</span>';
+                if(task.status === 'fail') statusMark = ' <span style="color:#f44336;">✗</span>';
+
+                li.innerHTML = `
+                    <span>${task.name} ${statusMark}</span>
+                    <div class="task-actions">
+                        <button class="action-btn btn-check" onclick="setTaskStatus(${index}, 'done')">✓</button>
+                        <button class="action-btn btn-cross" onclick="setTaskStatus(${index}, 'fail')">✗</button>
+                        <button class="action-btn btn-delete" onclick="deleteTask(${index})">🗑</button>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+            localStorage.setItem('salma_tasks', JSON.stringify(tasks));
+        }
+
+        document.getElementById('taskForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('taskInput');
+            if(input.value.trim()){
+                tasks.push({ name: input.value.trim(), status: null });
+                input.value = '';
+                renderTasks();
+            }
+        });
+
+        function setTaskStatus(index, status) {
+            tasks[index].status = tasks[index].status === status ? null : status;
+            renderTasks();
+        }
+
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            renderTasks();
+        }
+
+        // --- المؤقت والتنبيه ---
+        let timeLeft = 25 * 60;
+        let timerInterval = null;
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function setTimer(minutes) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            document.getElementById('startBtn').textContent = 'بدء';
+            timeLeft = minutes * 60;
+            updateTimerDisplay();
+        }
+
+        function toggleTimer() {
+            const startBtn = document.getElementById('startBtn');
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                startBtn.textContent = 'استئناف';
+            } else {
+                startBtn.textContent = 'إيقاف مؤقت';
+                timerInterval = setInterval(() => {
+                    if (timeLeft > 0) {
+                        timeLeft--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                        startBtn.textContent = 'بدء';
+                        alert('🔔 انتهى الوقت! وقت أخذ استراحة.');
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            document.getElementById('startBtn').textContent = 'بدء';
+            timeLeft = 25 * 60;
+            updateTimerDisplay();
+        }
+
+        // --- النوتة ورسم الـ Canvas ---
+        function switchTab(tab) {
+            const textSec = document.getElementById('textSection');
+            const drawSec = document.getElementById('drawSection');
+            if(tab === 'text') {
+                textSec.classList.remove('hidden');
+                drawSec.classList.add('hidden');
+            } else {
+                textSec.classList.add('hidden');
+                drawSec.classList.remove('hidden');
+                resizeCanvas();
+            }
+        }
+
+        function saveNote() {
+            localStorage.setItem('salma_note', document.getElementById('noteText').value);
+        }
+
+        // إعدادات اللوحة للرسم
+        const canvas = document.getElementById('paintCanvas');
+        const ctx = canvas.getContext('2d');
+        let painting = false;
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = 180;
+            ctx.strokeStyle = document.getElementById('colorPicker').value;
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+        }
+
+        function startPosition(e) {
+            painting = true;
+            draw(e);
+        }
+
+        function finishedPosition() {
+            painting = false;
+            ctx.beginPath();
+        }
+
+        function draw(e) {
+            if (!painting) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+            const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+
+            ctx.strokeStyle = document.getElementById('colorPicker').value;
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        canvas.addEventListener('mousedown', startPosition);
+        canvas.addEventListener('mouseup', finishedPosition);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('touchstart', startPosition);
+        canvas.addEventListener('touchend', finishedPosition);
+        canvas.addEventListener('touchmove', draw);
+
+        // تحميل البيانات المحفوظة عند الفتح
+        window.onload = () => {
+            renderTasks();
+            updateTimerDisplay();
+            document.getElementById('noteText').value = localStorage.getItem('salma_note') || '';
+        };
+    </script>
+</body>
+</html>
